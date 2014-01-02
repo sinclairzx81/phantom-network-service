@@ -62,7 +62,9 @@ var parameter = {url: 'http://google.com', mime: 'application/pdf'}
 
 client.render(parameter, function(readstream) {
 	
-	
+	var writestream = require('fs').createWriteStream('output.pdf')	
+
+	readstream.pipe(writestream)
 })
 ```
 
