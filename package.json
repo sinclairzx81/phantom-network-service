@@ -1,7 +1,7 @@
 {
   "name": "phantom.net",
-  "version": "0.0.1",
-  "description": "http wrapper for phantomjs.",
+  "version": "0.5.0",
+  "description": "run phantomjs as a web service.",
   "main": "app.js",
   "dependencies": {
   },

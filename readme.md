@@ -1,6 +1,6 @@
 ﻿### phantom.net
 
-For nodejs developers wanting to run phantomjs as a http web service. Includes both server and client library.
+For nodejs developers wanting to run phantomjs as a network service. Includes both server and client library.
 
 #### server
 
@@ -36,6 +36,58 @@ client.render(parameter, function(readstream) {
 
 ### overview
 
-phantom.net was written specifically for developers looking to expose phantomjs as a network service. More specifically, having
-a shared pdf generation tool for reporting. phantom.net allows developers to pass urls as well as raw html to render. Rendered
-results come back readable streams. Useful for writing results to disk, or back out as http response.
+phantom.net was written specifically for developers looking to expose phantomjs as a network service. The library allows developers to
+quickly host phantomjs as a http accessible endpoint, and pass it urls and content to render. phantom.net will respond with readable streams. 
+Useful for writing results to disk, or back out as http response.
+
+### parameters
+
+The following is the parameter definition when calling client.render(parameter, callback). ? indicates the parameter is optional.
+
+For more details on these the these parameters see [here](https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#properties-list).
+
+```typescript
+interface Parameter {
+    
+    content?   : string
+	
+    url?       : string
+        
+    mime       : string
+
+	timeout?   : number
+	
+    viewportSize? : { 
+        
+        width   : number 
+    
+        height  : number 
+    }
+    
+    paperSize? : {
+        
+        width?      : number
+
+        height?     : number
+
+        border?     : string
+
+        format?     : string
+
+        orientation?: string
+    }
+    
+    zoomFactor?  : number
+
+    clipRect? : { 
+
+        top   : number
+
+        left  : number 
+
+        width : number
+
+        height: number 
+    }
+}
+```
