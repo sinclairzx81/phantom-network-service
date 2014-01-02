@@ -1,4 +1,4 @@
-﻿### phantom.net
+﻿## phantom.net
 
 For nodejs developers wanting to run [phantomjs](http://phantomjs.org/) as a network service. Includes both server and client library.
 
@@ -36,18 +36,40 @@ client.render(parameter, function(readstream) {
 
 note: phantomjs needs to be installed on the server machine, and set up as a PATH environment variable.
 
+### contents
+
+* [overview](#overview)
+* [render](#render)
+* [example](#example)
+* [windows performance](#windows_performance)
+
+<a name="overview" />
 ### overview
 
 phantom.net was written specifically for developers looking to expose phantomjs as a network service. The library allows developers to
 quickly host phantomjs as a http accessible endpoint, and pass it urls and content to render. phantom.net will respond with readable streams. 
 Useful for writing results to disk, or back out as http response.
 
-### parameters
+<a name="render" />
+### render
 
-The following outlines the parameter type used when calling client.render(parameter, callback). ? indicates the parameter is optional. The parameter
-must contain either url or content. 
+```javascript
+var phantom = require('phantom.net')
 
-For more details on these the these parameters see [here](https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#properties-list).
+var client = new phantom.Client('http://localhost:5000')
+
+var parameter = {url: 'http://google.com', mime: 'application/pdf'}
+
+client.render(parameter, function(readstream) {
+	
+	
+})
+```
+
+The client render method accepts a single parameter which is passed to phantomjs for rendering. Below is the parameter definition. When passing
+this parameter, either url or content must be set. The mime is required, and can be either 'application/pdf', image/jpg', 'image/png' or 'image/gif'
+
+note: for more details on the following properties, see [here](https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#properties-list).
 
 ```typescript
 interface Parameter {
@@ -94,3 +116,45 @@ interface Parameter {
     }
 }
 ```
+
+<a name="example" />
+### example
+The following example demonstrates setting up both a phantom.net server (on port 5001) and phantom.net client within the same process. 
+We also create a basic nodejs http server (on port 5000) to output the stream returned from phantom.net. 
+
+```javascript
+
+var phantom = require('phantom.net')
+
+var server  = new phantom.Server(5001)
+
+var client  = new phantom.Client("http://localhost:5001")
+
+require('http').createServer(function(req, res) {
+	
+	var parameter = {url : 'http://google.com',
+					 mime : 'application/pdf', 	
+					 viewportSize : { width: 1600, height: 1200 } }
+	
+	client.render(parameter, function(errors, stream) {
+		
+		res.writeHead(200, {'Content-Type' : parameter.mime})
+		
+		stream.pipe(res)
+	})
+
+}).listen(5000)
+
+console.log('server listening on port 5000')
+
+```
+<a name="windows_performance" />
+### windows performance
+
+If running the server on a windows machine, rendering may take a considerable amount of time. If this is a issue, 
+you can speed things up unchecking 'automatically detect settings' in internet explorers LAN settings, as follows...
+
+* open up internet explorer.
+* options -> internet options -> connections (tab).
+* uncheck 'automatically detect settings'.
+* click on ok.
