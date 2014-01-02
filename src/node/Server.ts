@@ -164,7 +164,9 @@ class Server {
 
         var errors = []
 
-        if(!message.url)  { errors.push(['url is required']) }
+        if(!message.url && !message.content)  { errors.push(['url or content is required']) }
+
+        if(message.url && message.content)    { errors.push(['cannot supply both url and content in the same request'])}
 
         if(!message.mime) { errors.push(['mime is required']) }
 

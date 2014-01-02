@@ -28,7 +28,9 @@ interface Parameter {
 
     handle?    : string
     
-    url        : string
+    content?   : string
+
+    url?       : string
         
     mime       : string
 

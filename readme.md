@@ -1,10 +1,10 @@
 ﻿### phantom.net
 
-Run phantomjs as a http network service.
+For nodejs developers wanting to run phantomjs as a http web service. Includes both server and client library.
 
 #### server
 
-start a phantomjs service on port 5000
+start a phantom.net service on port 5000.
 
 ```javascript
 
@@ -29,3 +29,13 @@ client.render(parameter, function(readstream) {
 	// do something with the stream.
 })
 ```
+
+### install
+
+	npm install phantom.net
+
+### overview
+
+phantom.net was written specifically for developers looking to expose phantomjs as a network service. More specifically, having
+a shared pdf generation tool for reporting. phantom.net allows developers to pass urls as well as raw html to render. Rendered
+results come back readable streams. Useful for writing results to disk, or back out as http response.
