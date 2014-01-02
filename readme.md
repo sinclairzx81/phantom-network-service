@@ -134,9 +134,9 @@ var client  = new phantom.Client("http://localhost:5001")
 
 require('http').createServer(function(req, res) {
 	
-	var parameter = {url : 'http://google.com',
-					 mime : 'application/pdf', 	
-					 viewportSize : { width: 1600, height: 1200 } }
+	var parameter = {url: 'http://google.com', 
+					 mime: 'application/pdf', 
+					 viewportSize: { width: 1600, height: 1200 } }
 	
 	client.render(parameter, function(errors, stream) {
 		
