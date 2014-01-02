@@ -34,6 +34,8 @@ client.render(parameter, function(readstream) {
 
 	npm install phantom.net
 
+note: phantomjs needs to be installed on the server machine, and set up as a PATH environment variable.
+
 ### overview
 
 phantom.net was written specifically for developers looking to expose phantomjs as a network service. The library allows developers to
