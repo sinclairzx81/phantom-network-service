@@ -74,12 +74,12 @@ if(parameter.zoomFactor) {
 
 var resources = []
 
-page.onResourceRequested = function(request) {
+page.onResourceRequested = (request) => {
 
     resources[request.id] = request.stage;
 }
 
-page.onResourceReceived = function(response) {
+page.onResourceReceived = (response) => {
 
     resources[response.id] = response.stage;
 }
@@ -88,7 +88,7 @@ page.open(parameter.url, (status:string) => {
 
     if (status !== 'success') {
         
-        console.log('Unable to load the address!')
+        system.stdout.write('unable to load url ' + parameter.url)
         
         phantom.exit(1)
 

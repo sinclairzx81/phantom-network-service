@@ -4,9 +4,9 @@ var server = new phantom.Server(5000)
 
 console.log('server listening on port 5000')
 
-var client = new phantom.Client('http://sdfsdfds:5000')
+var client = new phantom.Client('http://localhost:5000')
 
-client.render({url: 'http://gsdfdsfdoogle.codddsdfsf4m', mime: 'application/pdf'}, function(error, readsteam) {
+client.render({url: 'http://spitfire.co.nz', mime: 'application/pdf'}, function(error, readsteam) {
     
     if (error) {
 

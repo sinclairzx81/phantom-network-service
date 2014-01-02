@@ -59,6 +59,7 @@ class Client {
         //--------------------------------------------------------------
         // make the http request
         //--------------------------------------------------------------
+
         var request = require('http').request(options, (response: http.ClientResponse) => {
             
             if(response.statusCode == 500) {
@@ -85,6 +86,7 @@ class Client {
         //--------------------------------------------------------------
         // handle errors
         //--------------------------------------------------------------
+
         request.on('error', () => {
         
             callback(['error: cannot talk to phantom.net server at ' + this.host], null)

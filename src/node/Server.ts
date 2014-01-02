@@ -201,13 +201,28 @@ class Server {
     /** renders the page with these parameters */
     private render       (message: Parameter, callback: (errors: string[]) => void) : void {
         
+        var haserror = false
+
         var json = JSON.stringify(message)
 
-	    var child = require("child_process").spawn('phantomjs', [ (__dirname + '/render.js'), base64.encode(json) ], { stdio: 'inherit' })
+	    var child = require("child_process").spawn('phantomjs', [ (__dirname + '/render.js'), base64.encode(json) ], {})
 
-        child.on('error', () => { callback(['unable to render page']) })
+        child.stdout.setEncoding('utf8')
 
-        child.on('close', () => { callback(null) })
+        child.stdout.on('data', (data) => { 
+            
+            haserror = true
+
+            callback([data]) 
+        })
+
+        child.on('close', () => { 
+            
+            if(!haserror) {
+
+                callback(null) 
+            }
+        })
     }
 
     /** generates a temp filename */
