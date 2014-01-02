@@ -220,7 +220,12 @@ class Server {
 
         var json = JSON.stringify(message)
 
-	    var child = require("child_process").spawn('phantomjs', [ (__dirname + '/render.js'), base64.encode(json) ], {})
+        var child = require("child_process").spawn('phantomjs', [ (__dirname + '/render.js'), base64.encode(json) ], {})
+
+        child.on('error', () => {
+            
+            callback(['phantomjs not installed or not configured in PATH.'])
+        })
 
         child.stdout.setEncoding('utf8')
 
