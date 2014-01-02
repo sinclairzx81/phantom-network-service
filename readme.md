@@ -66,7 +66,7 @@ client.render(parameter, function(readstream) {
 })
 ```
 
-The client render method accepts a single parameter which is passed to phantomjs for rendering. Below is the parameter definition. When passing
+The client render() method accepts a single parameter which is passed to phantomjs for rendering. Below is the parameter definition. When passing
 this parameter, either url or content must be set. The mime is required, and can be either 'application/pdf', image/jpg', 'image/png' or 'image/gif'
 
 note: for more details on the following properties, see [here](https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#properties-list).
@@ -155,6 +155,6 @@ If running the server on a windows machine, rendering may take a considerable am
 you can speed things up unchecking 'automatically detect settings' in internet explorers LAN settings, as follows...
 
 * open up internet explorer.
-* options -> internet options -> connections (tab).
+* options > internet options > connections (tab).
 * uncheck 'automatically detect settings'.
-* click on ok.
+* click ok.
