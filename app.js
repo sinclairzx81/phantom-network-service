@@ -6,17 +6,19 @@ console.log('server listening on port 5000')
 
 var client = new phantom.Client('http://localhost:5000')
 
-client.render({url: 'http://spitfire.co.nz', mime: 'application/pdf'}, function(error, readsteam) {
-    
-    if (error) {
+var content = require('fs').readFileSync('C:/input/html.html', 'utf8')
 
-        console.log(error)
+client.render({content: content, mime: 'application/pdf', timeout: 1660}, function(errors, readstream) {
+    
+    if (errors) {
+
+        console.log(errors)
         
         return
     }
-
+    
     var stream = require('fs').createWriteStream('C:/input/output.pdf')
 
-    readsteam.pipe(stream)
+    readstream.pipe(stream)
 })
 

@@ -48,7 +48,16 @@ var json      = base64.decode(system.args[1])
 var parameter = <Parameter>JSON.parse(json)
 
 //-------------------------------------------
-// apply properties
+// parse parameter
+//-------------------------------------------
+
+if(!parameter.timeout) {
+
+    parameter.timeout = 200
+}
+
+//-------------------------------------------
+// apply parameter
 //-------------------------------------------
 
 if(parameter.viewportSize) {
@@ -68,6 +77,13 @@ if(parameter.zoomFactor) {
     page.zoomFactor = parameter.zoomFactor
 }
 
+if(parameter.clipRect) {
+
+    page.clipRect = parameter.clipRect
+}
+
+
+
 //-------------------------------------------
 // process page
 //-------------------------------------------
@@ -84,25 +100,41 @@ page.onResourceReceived = (response) => {
     resources[response.id] = response.stage;
 }
 
-page.open(parameter.url, (status:string) => {
+if(parameter.content) {
 
-    if (status !== 'success') {
-        
-        system.stdout.write('unable to load url ' + parameter.url)
-        
-        phantom.exit(1)
+    page.content = parameter.content
 
-        return
-    }
-
-    window.setTimeout(() => {
+    setTimeout(function() {
     
         page.render(parameter.handle)
-        
-        phantom.exit(1)
 
-    }, 200)
-})
+        phantom.exit(1)
+    
+    }, parameter.timeout)
+}
+
+if(parameter.url) {
+
+    page.open(parameter.url, (status:string) => {
+
+        if (status !== 'success') {
+        
+            system.stdout.write('unable to load url ' + parameter.url)
+        
+            phantom.exit(1)
+
+            return
+        }
+
+        window.setTimeout(() => {
+    
+            page.render(parameter.handle)
+        
+            phantom.exit(1)
+
+        }, parameter.timeout)
+    })
+}
 
 
 

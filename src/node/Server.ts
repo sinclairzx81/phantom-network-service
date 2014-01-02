@@ -32,6 +32,8 @@ class Server {
 
     constructor(public port: number) {
 
+        this.prepare_temp_directory()
+
         this.server = require('http').createServer((request: http.ServerRequest, response: http.ServerResponse) => {
 
             if(request.url == '/') {
@@ -81,7 +83,7 @@ class Server {
                     return
                 }
 
-                message.handle = settings.output_directory + this.create_handle(message.mime)
+                message.handle = paths.temp_directory + this.create_handle(message.mime)
 
                 this.render(message, (errors) => {
 
@@ -96,17 +98,28 @@ class Server {
                     // write to http stream, dispose of file.
                     //----------------------------------------------
 
-                    response.writeHead(200, {'Content-Type' : message.mime})
+                    require('fs').exists(message.handle, (exists: boolean) => {
 
-                    var readstream = require('fs').createReadStream(message.handle)
+                        if(!exists) {
+                            
+                            this.errors(['phantomjs failed to render'], response)
 
-                    readstream.on('data', (data) => { response.write(data) })
+                            return
+                        }
 
-                    readstream.on('end',  () => { 
-                    
-                        response.end()
-                        
-                        require('fs').unlink(message.handle, function (errors) {})
+                        response.writeHead(200, {'Content-Type' : message.mime})
+
+                        var readstream = require('fs').createReadStream(message.handle)
+
+                        readstream.on('data', (data) => { response.write(data) })
+
+                        readstream.on('end',  () => {
+                            
+                            require('fs').unlink(message.handle, function (errors) {
+                            
+                                response.end()
+                            })
+                        })
                     })
                 })                     
             })
@@ -114,7 +127,7 @@ class Server {
     }
 
     /** reads the posted string */
-    private recv (request: http.ServerRequest, callback: (error: any, data: string) => void) : void {
+    private recv     (request: http.ServerRequest, callback: (error: any, data: string) => void) : void {
         
         var buffer = []
 
@@ -128,7 +141,7 @@ class Server {
     }
 
     /** parses post as json */
-    private json (request: http.ServerRequest, callback: (error: any, message: Parameter) => void) : void {
+    private json     (request: http.ServerRequest, callback: (error: any, message: Parameter) => void) : void {
         
         this.recv(request, (error, data) => {
             
@@ -252,5 +265,25 @@ class Server {
             return v.toString(16)
         
         }) + extension
+    }
+
+    /** prepares temp directory */
+    private prepare_temp_directory() : void {
+        
+        var exists = require('fs').existsSync(paths.temp_directory)
+        
+        if(exists) {
+
+            var filenames = require('fs').readdirSync(paths.temp_directory)
+
+            for(var i = 0; i < filenames.length; i++) {
+
+                require('fs').unlinkSync(paths.temp_directory + filenames[i])
+            }
+        }
+        else {
+
+            require('fs').mkdirSync(paths.temp_directory)
+        }
     }
 }

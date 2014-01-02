@@ -30,6 +30,8 @@ interface Parameter {
     
     content?   : string
 
+    timeout?   : number
+
     url?       : string
         
     mime       : string
@@ -41,8 +43,6 @@ interface Parameter {
         height  : number 
     }
     
-    /** the papersize. { width: '200px', height: '300px', border: '0px' } or
-        { format: 'A4', orientation: 'portrait', border: '1cm' } */
     paperSize? : {
         
         width?      : number
@@ -57,4 +57,15 @@ interface Parameter {
     }
     
     zoomFactor?  : number
+
+    clipRect? : { 
+
+        top   : number
+
+        left  : number 
+
+        width : number
+
+        height: number 
+    }
 }

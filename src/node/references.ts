@@ -25,7 +25,7 @@ THE SOFTWARE.
 ---------------------------------------------------------------------------*/
 
 /// <reference path="references/node.d.ts" />
-/// <reference path="../common/settings.ts" />
+/// <reference path="../common/paths.ts" />
 /// <reference path="../common/base64.ts" />
 /// <reference path="../common/parameter.ts" />
 

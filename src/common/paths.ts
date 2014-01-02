@@ -24,7 +24,7 @@ THE SOFTWARE.
 
 ---------------------------------------------------------------------------*/
 
-module settings {
+module paths {
 
-    export var output_directory : string = './'
+    export var temp_directory : string = __dirname + '/temp/'
 }
