@@ -39,33 +39,33 @@ declare var phantom;
 // format message parameters
 //-------------------------------------------
 
-var system  = require('system')
+var system    = require('system')
 
-var page    = require('webpage').create()
+var page      = require('webpage').create()
 
-var json    = base64.decode(system.args[1])
+var json      = base64.decode(system.args[1])
 
-var message = <Message>JSON.parse(json)
+var parameter = <Parameter>JSON.parse(json)
 
 //-------------------------------------------
 // apply properties
 //-------------------------------------------
 
-if(message.viewportSize) {
+if(parameter.viewportSize) {
 
-    page.viewportSize = message.viewportSize
+    page.viewportSize = parameter.viewportSize
     
 }
 
-if(message.paperSize) {
+if(parameter.paperSize) {
 
-    page.paperSize = message.paperSize
+    page.paperSize = parameter.paperSize
     
 }
 
-if(message.zoomFactor) {
+if(parameter.zoomFactor) {
     
-    page.zoomFactor = message.zoomFactor
+    page.zoomFactor = parameter.zoomFactor
 }
 
 //-------------------------------------------
@@ -84,7 +84,7 @@ page.onResourceReceived = function(response) {
     resources[response.id] = response.stage;
 }
 
-page.open(message.url, (status:string) => {
+page.open(parameter.url, (status:string) => {
 
     if (status !== 'success') {
         
@@ -97,7 +97,7 @@ page.open(message.url, (status:string) => {
 
     window.setTimeout(() => {
     
-        page.render(message.handle)
+        page.render(parameter.handle)
         
         phantom.exit(1)
 

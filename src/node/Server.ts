@@ -95,6 +95,7 @@ class Server {
                     //----------------------------------------------
                     // write to http stream, dispose of file.
                     //----------------------------------------------
+
                     response.writeHead(200, {'Content-Type' : message.mime})
 
                     var readstream = require('fs').createReadStream(message.handle)

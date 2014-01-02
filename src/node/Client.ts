@@ -28,12 +28,70 @@ THE SOFTWARE.
 
 class Client {
 
-    constructor(host: string) {
+    constructor(public host: string) {
 
     }
 
-    public request(parameter: Parameter, callback: (errors: string[], stream: stream.ReadableStream ) => void ) : void {
+    public render(parameter: Parameter, callback: (errors: string[], stream: stream.ReadableStream) => void): void {
 
+        var endpoint = require('url').parse(this.host)
+
+        var json     = JSON.stringify(parameter)
+
+        var options = {
+
+            host   : endpoint.hostname,
+
+            port   : endpoint.port,
+
+            path   : endpoint.path,
+
+            method : 'POST',
+
+            headers: {
+
+                'Content-Type': 'application/json',
+
+                'Content-Length': Buffer.byteLength(json)
+            }
+        }
+
+        //--------------------------------------------------------------
+        // make the http request
+        //--------------------------------------------------------------
+        var request = require('http').request(options, (response: http.ClientResponse) => {
+            
+            if(response.statusCode == 500) {
+
+                var buffer = []
+
+                response.setEncoding('utf8')
+
+                response.on('data', (data) => { buffer.push(data) })
+
+                response.on('end',  () => { 
+                    
+                    var json = buffer.join('')
+
+                    callback(JSON.parse(json), null)
+                })
+
+                return
+            }
+
+            callback(null, response)
+        })
+
+        //--------------------------------------------------------------
+        // handle errors
+        //--------------------------------------------------------------
+        request.on('error', () => {
         
+            callback(['error: cannot talk to phantom.net server at ' + this.host], null)
+        })
+
+        request.write(json)
+        
+        request.end()
     }
 }
