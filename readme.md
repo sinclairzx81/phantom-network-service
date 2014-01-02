@@ -22,7 +22,9 @@ var phantom = require('phantom.net')
 
 var client = new phantom.Client('http://localhost:5000')
 
-client.render({url: 'http://google.com', mime: 'application/pdf'}, function(readsteam) {
+var parameter = {url: 'http://google.com', mime: 'application/pdf'}
+
+client.render(parameter, function(readstream) {
 	
 	// do something with the stream.
 })
