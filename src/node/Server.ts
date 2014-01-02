@@ -64,7 +64,7 @@ class Server {
 
     /* handles the request */
     private handler  (request: http.ServerRequest, response: http.ServerResponse) : void {
-    
+        
         this.json(request, (errors, message) => {
 
             if(errors) {

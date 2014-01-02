@@ -1,6 +1,6 @@
 ﻿### phantom.net
 
-For nodejs developers wanting to run phantomjs as a network service. Includes both server and client library.
+For nodejs developers wanting to run [phantomjs](http://phantomjs.org/) as a network service. Includes both server and client library.
 
 #### server
 
@@ -42,7 +42,8 @@ Useful for writing results to disk, or back out as http response.
 
 ### parameters
 
-The following is the parameter definition when calling client.render(parameter, callback). ? indicates the parameter is optional.
+The following outlines the parameter type used when calling client.render(parameter, callback). ? indicates the parameter is optional. The parameter
+must contain either url or content. 
 
 For more details on these the these parameters see [here](https://github.com/ariya/phantomjs/wiki/API-Reference-WebPage#properties-list).
 
