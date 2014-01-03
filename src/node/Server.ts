@@ -106,8 +106,10 @@ class Server {
 
                             return
                         }
+                        
+                        var stat = require('fs').statSync(message.handle);
 
-                        response.writeHead(200, {'Content-Type' : message.mime})
+                        response.writeHead(200, {'Content-Type' : message.mime, 'Content-Length': stat.size})
 
                         var readstream = require('fs').createReadStream(message.handle)
 
