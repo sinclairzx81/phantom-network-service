@@ -45,31 +45,25 @@ var page      = require('webpage').create()
 
 var json      = base64.decode(system.args[1])
 
-var parameter = <Parameter>JSON.parse(json)
-
 //-------------------------------------------
 // parse parameter
 //-------------------------------------------
 
-if(!parameter.timeout) {
+var parameter = <Parameter>JSON.parse(json)
 
-    parameter.timeout = 200
+if(!parameter.wait) {
+
+    parameter.wait = 200
 }
-
-//-------------------------------------------
-// apply parameter
-//-------------------------------------------
 
 if(parameter.viewportSize) {
 
     page.viewportSize = parameter.viewportSize
-    
 }
 
 if(parameter.paperSize) {
 
     page.paperSize = parameter.paperSize
-    
 }
 
 if(parameter.zoomFactor) {
@@ -82,10 +76,8 @@ if(parameter.clipRect) {
     page.clipRect = parameter.clipRect
 }
 
-
-
 //-------------------------------------------
-// process page
+// resources: 
 //-------------------------------------------
 
 var resources = []
@@ -100,39 +92,45 @@ page.onResourceReceived = (response) => {
     resources[response.id] = response.stage;
 }
 
+//-------------------------------------------
+// load content: 
+//-------------------------------------------
+
+page.onInitialized = () => {
+
+    window.setTimeout(() => {
+    
+        page.render(parameter.handle)
+        
+        phantom.exit(1)
+
+    }, parameter.wait)
+}
+
+//-------------------------------------------
+// load content: 
+//-------------------------------------------
+
 if(parameter.content) {
 
     page.content = parameter.content
-
-    setTimeout(function() {
-    
-        page.render(parameter.handle)
-
-        phantom.exit(1)
-    
-    }, parameter.timeout)
 }
 
+//-------------------------------------------
+// load url: 
+//-------------------------------------------
 if(parameter.url) {
 
     page.open(parameter.url, (status:string) => {
 
         if (status !== 'success') {
         
-            system.stdout.write('unable to load url ' + parameter.url)
-        
+            system.stderr.write('unable to load url ' + parameter.url)
+            
             phantom.exit(1)
 
             return
         }
-
-        window.setTimeout(() => {
-    
-            page.render(parameter.handle)
-        
-            phantom.exit(1)
-
-        }, parameter.timeout)
     })
 }
 

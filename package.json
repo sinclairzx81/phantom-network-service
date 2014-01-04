@@ -1,17 +1,36 @@
 {
-  "name": "phantom.net",
-  "version": "0.5.0",
-  "description": "run phantomjs as a web service.",
+  "name"       : "phantom.net",
+  
+  "version"    : "0.5.1",
+  
+  "description": "run phantomjs as a network service.",
+  
   "main": "app.js",
-  "dependencies": {
+
+  "dependencies"    : {},
+
+  "devDependencies" : {},
+
+  "scripts"         : {},
+
+  "repository"      : {
+    
+	"type": "git",
+    
+	"url": "https://github.com/sinclairzx81/phantom.net"
+
   },
-  "devDependencies": {},
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "keywords": [
-    "phantomjs", "render", "client", "server"
-  ],
+
+  "keywords": [ "phantomjs", "render", "client", "server"],
+
   "author": "sinclair",
-  "license": "MIT"
+
+  "licenses": [ {
+    
+	"type" : "The MIT License (MIT)",
+
+    "url"  : "https://raw.github.com/sinclairzx81/phantom.net/master/license.txt"
+  } ],
+
+  "readmeFilename": "readme.md"
 }

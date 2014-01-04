@@ -40,6 +40,7 @@ note: phantomjs needs to be installed on the server machine, and set up as a PAT
 
 * [overview](#overview)
 * [render](#render)
+* [waiting](#waiting)
 * [example](#example)
 * [windows performance](#windows_performance)
 
@@ -78,11 +79,11 @@ interface Parameter {
     
     content?   : string
 	
-    url?       : string
+    url?       : string 
         
-    mime       : string
+    mime       : string 
 
-	timeout?   : number
+	wait?      : number
 	
     viewportSize? : { 
         
@@ -117,6 +118,32 @@ interface Parameter {
         height: number 
     }
 }
+```
+<a name="waiting" />
+### waiting
+
+By default, phantom.net will wait 200ms for a page to render. A client can modify this value to increase the allowed for the page
+to load. The following will wait 2 seconds.
+
+```javascript
+var phantom = require('phantom.net')
+
+var client = new phantom.Client('http://localhost:5000')
+
+client.render({url: 'http://google.com', mime: 'application/pdf', wait: 2000}, function(readstream) {
+	
+})
+```
+
+By default, the phantom.net server will put limits on waiting (the default is 4 seconds), however you can override the maximum 
+wait as follows...
+
+```javascript
+
+var phantom = require('phantom.net')
+
+var server = new phantom.Server(5000, {maximum_wait: 10000})
+
 ```
 
 <a name="example" />

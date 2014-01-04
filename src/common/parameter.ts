@@ -30,7 +30,7 @@ interface Parameter {
     
     content?   : string
 
-    timeout?   : number
+    wait?      : number
 
     url?       : string
         

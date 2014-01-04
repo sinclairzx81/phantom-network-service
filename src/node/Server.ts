@@ -26,13 +26,20 @@ THE SOFTWARE.
 
 /// <reference path="references.ts" />
 
+interface ServerOptions {
+
+    maximum_wait?: number
+}
+
 class Server {
 
     private server: http.Server
 
-    constructor(public port: number) {
+    constructor(public port: number, public options: ServerOptions) {
 
-        this.prepare_temp_directory()
+        this.prepare_server_options ()
+
+        this.prepare_temp_directory ()
 
         this.server = require('http').createServer((request: http.ServerRequest, response: http.ServerResponse) => {
 
@@ -46,76 +53,97 @@ class Server {
                 }
             }
 
-            this.errors(['invalid request'], response)
+            this.error_handler(403, ['invalid request'], response)
         })
         
         this.server.listen(this.port)       
     }
 
-    /* handles any errors */
-    private errors   (errors: string[], response: http.ServerResponse) : void {
+    /** handle errors */
+    private error_handler (statusCode: number, errors: string[], response: http.ServerResponse) : void {
         
-        response.writeHead(500, {'Content-Type' : 'application/json'})
+        var json = JSON.stringify(errors, null, 4)
+
+        response.writeHead(statusCode, {'Content-Type': 'application/json',  'Content-Length': Buffer.byteLength(json)})
         
-        response.write(JSON.stringify(errors, null, 4))
+        response.write(json)
 
         response.end()
     }
 
-    /* handles the request */
-    private handler  (request: http.ServerRequest, response: http.ServerResponse) : void {
+    /* handle request */
+    private handler (request: http.ServerRequest, response: http.ServerResponse) : void {
         
-        this.json(request, (errors, message) => {
+        //----------------------------------------------
+        // read json parameter from request body
+        //----------------------------------------------        
+        
+        this.json(request, (errors, parameter) => {
 
             if(errors) {
             
-                this.errors(errors, response)
+                this.error_handler(403, errors, response)
 
                 return
             }
 
-            this.validate(message, (errors) => {
+            //----------------------------------------------
+            // validate parameter
+            //---------------------------------------------- 
+            
+            this.validate(parameter, (errors) => {
 
                 if(errors) {
-            
-                    this.errors(errors, response)
+                    
+                    this.error_handler(403, errors, response)
 
                     return
                 }
 
-                message.handle = paths.temp_directory + this.create_handle(message.mime)
+                //----------------------------------------------
+                // call to phantom
+                //----------------------------------------------
+                
+                parameter.handle = paths.temp_directory + this.create_file_handle(parameter.mime)
 
-                this.render(message, (errors) => {
+                this.render(parameter, (errors) => {
 
                     if(errors) {
             
-                        this.errors(errors, response)
+                        this.error_handler(500, errors, response)
 
                         return
                     }
 
                     //----------------------------------------------
-                    // write to http stream, dispose of file.
+                    // ensure that phantom rendered file
                     //----------------------------------------------
 
-                    require('fs').exists(message.handle, (exists: boolean) => {
+                    require('fs').stat(parameter.handle, (error: any, stat: fs.Stats) => {
 
-                        if(!exists) {
+                        if(error) {
                             
-                            this.errors(['phantomjs failed to render'], response)
+                            this.error_handler(500, ['phantomjs failed to render'], response)
 
                             return
                         }
 
-                        response.writeHead(200, {'Content-Type' : message.mime})
+                        //----------------------------------------------
+                        // write file to http response
+                        //----------------------------------------------
 
-                        var readstream = require('fs').createReadStream(message.handle)
+                        response.writeHead(200, {'Content-Type': parameter.mime, 'Content-Length': stat.size})
 
-                        readstream.on('data', (data) => { response.write(data) })
+                        var readstream = require('fs').createReadStream(parameter.handle)
 
-                        readstream.on('end',  () => {
+                        readstream.pipe(response)
+
+                        readstream.on('end', ()     => {
                             
-                            require('fs').unlink(message.handle, function (errors) {
+                            //----------------------------------------------
+                            // remove phantom file.
+                            //----------------------------------------------
+                            require('fs').unlink(parameter.handle, (errors) => {
                             
                                 response.end()
                             })
@@ -126,35 +154,23 @@ class Server {
         })        
     }
 
-    /** reads the posted string */
-    private recv     (request: http.ServerRequest, callback: (error: any, data: string) => void) : void {
+    /** reads json post from http request body */
+    private json (request: http.ServerRequest, callback: (error: any[], parameter: Parameter) => void) : void {
         
         var buffer = []
 
         request.setEncoding('utf8')
 
-        request.on('data',  (data) =>  { buffer.push(data) })
-
-        request.on('error', (error) => { callback(error, null ) })            
-        
-        request.on('end',   ()      => { callback(null, buffer.join('')) })
-    }
-
-    /** parses post as json */
-    private json     (request: http.ServerRequest, callback: (error: any, message: Parameter) => void) : void {
-        
-        this.recv(request, (error, data) => {
+        request.on('data',  (data) =>  { 
             
-            if(error)  {
-
-                callback(error, null)
-
-                return
-            }
-
+            buffer.push(data)
+        })
+        
+        request.on('end', () => { 
+            
             try {
             
-                var obj = JSON.parse(data)
+                var obj = JSON.parse(buffer.join(''))
 
                 callback(null, obj)
             }
@@ -162,30 +178,59 @@ class Server {
             
                 callback([e.toString()], null)
             }
-        })      
+        })    
     }
     
-    /** validates the json */
-    private validate (message: Parameter, callback: (errors: string[]) => void) : void {
+    /** validates the request parameter */
+    private validate (parameter: Parameter, callback: (errors: string[]) => void) : void {
 
-        if(!message) {
+        if(!parameter) {
             
-            callback(['message is null'])
+            callback(['parameter is null.'])
 
             return
         }
 
         var errors = []
 
-        if(!message.url && !message.content)  { errors.push(['url or content is required']) }
+        if(!parameter.url && !parameter.content) { 
+            
+            errors.push('url or content is required.')    
+        }
 
-        if(message.url && message.content)    { errors.push(['cannot supply both url and content in the same request'])}
+        if(parameter.url && parameter.content) { 
+            
+            errors.push('cannot supply both url and content in the same request.')
+        }
 
-        if(!message.mime) { errors.push(['mime is required']) }
+        if(!parameter.mime) { 
+            
+            errors.push('mime is required.') 
+        }
 
-        if(message.mime)  {
+        if(parameter.wait) {
+
+            if((typeof parameter.wait === "number") && Math.floor(parameter.wait) === parameter.wait) {
+
+                if(parameter.wait > this.options.maximum_wait) {
+                    
+                    errors.push('wait exceeds maximum allowed wait time. maximum is ' + this.options.maximum_wait.toString() + '.')
+                }
+
+                if(parameter.wait < 0) {
+                
+                    errors.push('wait cannot be a negative value.')
+                }
+            }
+            else {
+                
+                errors.push('wait is not a integer value.')
+            }
+        }
+
+        if(parameter.mime)  {
         
-            switch(message.mime) {
+            switch(parameter.mime) {
             
                 case 'application/pdf': break;
 
@@ -197,7 +242,7 @@ class Server {
 
                 case 'image/gif':       break;
                 
-                default: 
+                default:
 
                     errors.push('output mime is invalid.')
 
@@ -205,35 +250,40 @@ class Server {
             }
         }
         
+
         if(errors.length > 0) {
 
             callback(errors)
+
+            return
         }
 
         callback(null)        
     }
 
-    /** renders the page with these parameters */
-    private render       (message: Parameter, callback: (errors: string[]) => void) : void {
+    /** starts phantomjs and sends it the parameter to render. */
+    private render (parameter: Parameter, callback: (errors: string[]) => void) : void {
         
         var haserror = false
 
-        var json = JSON.stringify(message)
+        var json     = JSON.stringify(parameter)
 
-        var child = require("child_process").spawn('phantomjs', [ (__dirname + '/render.js'), base64.encode(json) ], {})
-
-        child.on('error', () => {
-            
-            callback(['phantomjs not installed or not configured in PATH.'])
-        })
+        var child    = require("child_process").spawn('phantomjs', [ (__dirname + '/render.js'), base64.encode(json) ], {})
 
         child.stdout.setEncoding('utf8')
 
-        child.stdout.on('data', (data) => { 
+        child.stdout.on('data', (data) => {
+
+            console.log(data)
+        })
+
+        child.stderr.setEncoding('utf8')
+
+        child.stderr.on('data', (data) => {
             
             haserror = true
 
-            callback([data]) 
+            callback([data])
         })
 
         child.on('close', () => { 
@@ -243,10 +293,15 @@ class Server {
                 callback(null) 
             }
         })
+
+        child.on('error', () => {
+            
+            callback(['phantomjs not installed or not configured in PATH.'])
+        })
     }
 
-    /** generates a temp filename */
-    private create_handle (mime: string) : string {
+    /** generates a temporary filename */
+    private create_file_handle (mime: string) : string {
             
         var extension = '.jpg'
 
@@ -289,6 +344,17 @@ class Server {
         else {
 
             require('fs').mkdirSync(paths.temp_directory)
+        }
+    }
+
+    /** parses the server options */
+    private prepare_server_options() : void {
+    
+        this.options = this.options || {}
+
+        if(!this.options.maximum_wait) {
+        
+            this.options.maximum_wait = 4000
         }
     }
 }

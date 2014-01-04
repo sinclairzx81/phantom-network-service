@@ -62,7 +62,7 @@ class Client {
 
         var request = require('http').request(options, (response: http.ClientResponse) => {
             
-            if(response.statusCode == 500) {
+            if(response.statusCode != 200) {
 
                 var buffer = []
 
@@ -79,7 +79,7 @@ class Client {
 
                 return
             }
-
+            
             callback(null, response)
         })
 
